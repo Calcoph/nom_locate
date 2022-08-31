@@ -183,12 +183,14 @@ fn it_should_calculate_columns() {
 
     let bar_idx = input.find_substring("bar").unwrap();
     assert_eq!(input.slice(bar_idx..).get_column(), 9);
+    assert_eq!(input.slice(bar_idx..).get_column_first_line(), 9+4);
 }
 
 #[test]
 fn it_should_calculate_columns_accurately_with_non_ascii_chars() {
     let s = StrSpan::new("メカジキ");
     assert_eq!(s.slice(6..).get_utf8_column(), 3);
+    assert_eq!(s.slice(6..).get_utf8_column_first_line(), 3);
 }
 
 #[test]
@@ -201,6 +203,18 @@ fn it_should_panic_when_getting_column_if_offset_is_too_big() {
         extra: "",
     };
     s.get_column();
+}
+
+#[test]
+#[should_panic(expected = "offset is too big")]
+fn it_should_panic_when_getting_column_if_offset_is_too_big2() {
+    let s = StrSpanEx {
+        offset: usize::max_value(),
+        fragment: "",
+        line: 1,
+        extra: "",
+    };
+    s.get_column_first_line();
 }
 
 #[cfg(feature = "alloc")]

@@ -342,6 +342,14 @@ impl<T: AsBytes, X> LocatedSpan<T, X> {
         (column, &before_self[self.offset - (column - 1)..])
     }
 
+    fn get_char_position(&self) -> (usize, &[u8]) {
+        let before_self = &self.get_unoffsetted_slice()[..self.offset];
+
+        let column = self.offset + 1;
+
+        (column, &before_self[self.offset - (column - 1)..])
+    }
+
     /// Return the line that contains this LocatedSpan.
     ///
     /// The `get_column` and `get_utf8_column` functions returns
@@ -401,6 +409,10 @@ impl<T: AsBytes, X> LocatedSpan<T, X> {
         self.get_columns_and_bytes_before().0
     }
 
+    pub fn get_column_first_line(&self) -> usize {
+        self.get_char_position().0
+    }
+
     /// Return the column index for UTF8 text. Return value is unspecified for non-utf8 text.
     ///
     /// This version uses bytecount's hyper algorithm to count characters. This is much faster
@@ -430,6 +442,11 @@ impl<T: AsBytes, X> LocatedSpan<T, X> {
         num_chars(before_self) + 1
     }
 
+    pub fn get_utf8_column_first_line(&self) -> usize {
+        let before_self = self.get_char_position().1;
+        num_chars(before_self) + 1
+    }
+
     /// Return the column index for UTF8 text. Return value is unspecified for non-utf8 text.
     ///
     /// A simpler implementation of `get_utf8_column` that may be faster on shorter lines.
@@ -454,6 +471,11 @@ impl<T: AsBytes, X> LocatedSpan<T, X> {
     /// ```
     pub fn naive_get_utf8_column(&self) -> usize {
         let before_self = self.get_columns_and_bytes_before().1;
+        naive_num_chars(before_self) + 1
+    }
+
+    pub fn naive_get_utf8_column_first_line(&self) -> usize {
+        let before_self = self.get_char_position().1;
         naive_num_chars(before_self) + 1
     }
 }
